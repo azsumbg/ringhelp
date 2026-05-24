@@ -17,6 +17,8 @@ constexpr float scr_height{ 800.0f };
 constexpr float sky{ 50.0f };
 constexpr float ground{ 100.0f };
 
+constexpr float max_jump{ 100.0f };
+
 constexpr int EX_PTR{ 6001 };
 constexpr int EX_INDEX{ 6002 };
 constexpr int EX_PARAM{ 6003 };
@@ -546,7 +548,7 @@ namespace dll
 
 		void climb(float ground_speed, D2D1_RECT_F hill, fields hill_type);
 
-		void jump();
+		void jump(BAG<D2D1_RECT_F>& grounds);
 
 		int get_frame();
 
@@ -568,4 +570,5 @@ namespace dll
 		float first_yrad, float second_yrad);
 
 	RINGHELP_API void sort(BAG<D2D1_POINT_2F>& bag, D2D1_POINT_2F ref);
+	RINGHELP_API void sort(BAG<D2D1_RECT_F>& bag, D2D1_RECT_F ref);
 }

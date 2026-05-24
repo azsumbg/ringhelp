@@ -420,9 +420,67 @@ void dll::HERO::climb(float ground_speed, D2D1_RECT_F hill, fields hill_type)
 	}
 }
 
-void jump();
+void dll::HERO::jump(BAG<D2D1_RECT_F>& grounds)
+{
+	if (!in_jump)
+	{
+		in_jump = true;
+		jump_up = true;
 
-int get_frame();
+		set_path(start.x, start.y - max_jump);
+	}
+	else
+	{
+		if (jump_up)
+		{
+			start.y -= _speed;
+			set_edges();
+			if (end.y <= move_ey)
+			{
+				jump_up = false;
+				set_path(start.x, move_sy);
+			}
+		}
+		else
+		{
+			start.y += _speed;
+			set_edges();
+			if (!grounds.empty())
+			{
+				sort(grounds, unit_rect);
+				if (intersect(unit_rect, grounds[0]))
+				{
+					in_jump = false;
+					end.y = move_ey;
+					start.y = end.y - _height;
+					set_edges();
+					action = actions::stop;
+				}
+			}
+			else if (end.y >= move_ey)
+			{
+				in_jump = false;
+				end.y = move_ey;
+				start.y = end.y - _height;
+				set_edges();
+				action = actions::stop;
+			}
+		}
+	}
+}
+
+int dll::HERO::get_frame()
+{
+	--frame_delay;
+	if (frame_delay <= 0)
+	{
+		frame_delay = max_frame_delay;
+		++frame;
+		if (frame > max_frames)frame = 0;
+	}
+
+	return frame;
+}
 
 void dll::HERO::Release()
 {
@@ -435,7 +493,6 @@ dll::HERO* dll::HERO::create(float sx, float sy)
 
 	return ret;
 }
-
 
 //////////////////////////////////////////
 
@@ -497,6 +554,38 @@ void dll::sort(BAG<D2D1_POINT_2F>& bag, D2D1_POINT_2F ref)
 					D2D1_POINT_2F temp = bag[count];
 					bag[count] = bag[count + 1];
 					bag[count + 1] = temp;
+				}
+			}
+		}
+	}
+}
+void dll::sort(BAG<D2D1_RECT_F>& bag, D2D1_RECT_F ref)
+{
+	if (bag.size() < 2)return;
+	else
+	{
+		bool ok{ false };
+
+		while (!ok)
+		{
+			ok = true;
+
+			for (size_t count = 0; count < bag.size() - 1; ++count)
+			{
+				D2D1_POINT_2F first_center{ bag[count].left + (bag[count].right - bag[count].left) / 2.0f,
+				bag[count].top + (bag[count].bottom - bag[count].top) / 2.0f };
+
+				D2D1_POINT_2F second_center{ bag[count + 1].left + (bag[count + 1].right - bag[count + 1].left) / 2.0f,
+				bag[count + 1].top + (bag[count + 1].bottom - bag[count + 1].top) / 2.0f };
+
+				D2D1_POINT_2F ref_center{ ref.left + (ref.right - ref.left) / 2.0f, ref.top + (ref.bottom - ref.top) / 2.0f };
+
+				if (distance(first_center, ref_center) > distance(second_center, ref_center))
+				{
+					D2D1_RECT_F temp = bag[count];
+					bag[count] = bag[count + 1];
+					bag[count + 1] = temp;
+					ok = false;
 				}
 			}
 		}
