@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="ringhelp/ringhelp.vcxproj" />
+  <Project Path="ringhelp/ringhelp.vcxproj" Id="b2c06e6e-247e-4cd8-9cbb-bb94a8b26717" />
 </Solution>

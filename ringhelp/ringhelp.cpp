@@ -73,6 +73,11 @@ dll::PROTON::PROTON()
 
 	center.x = start.x + x_rad;
 	center.y = start.y + y_rad;
+
+	unit_rect.left = start.x;
+	unit_rect.right = end.x;
+	unit_rect.top = start.y;
+	unit_rect.bottom = end.y;
 }
 dll::PROTON::PROTON(float _sx, float _sy)
 {
@@ -87,6 +92,11 @@ dll::PROTON::PROTON(float _sx, float _sy)
 
 	center.x = start.x + x_rad;
 	center.y = start.y + y_rad;
+
+	unit_rect.left = start.x;
+	unit_rect.right = end.x;
+	unit_rect.top = start.y;
+	unit_rect.bottom = end.y;
 }
 dll::PROTON::PROTON(float _sx, float _sy, float _first_width, float _first_height)
 {
@@ -104,6 +114,11 @@ dll::PROTON::PROTON(float _sx, float _sy, float _first_width, float _first_heigh
 
 	center.x = start.x + x_rad;
 	center.y = start.y + y_rad;
+
+	unit_rect.left = start.x;
+	unit_rect.right = end.x;
+	unit_rect.top = start.y;
+	unit_rect.bottom = end.y;
 }
 
 void dll::PROTON::set_edges()
@@ -113,6 +128,11 @@ void dll::PROTON::set_edges()
 
 	center.x = start.x + x_rad;
 	center.y = start.y + y_rad;
+
+	unit_rect.left = start.x;
+	unit_rect.right = end.x;
+	unit_rect.top = start.y;
+	unit_rect.bottom = end.y;
 }
 void dll::PROTON::new_dims(float _new_width, float _new_height)
 {
@@ -127,6 +147,11 @@ void dll::PROTON::new_dims(float _new_width, float _new_height)
 
 	center.x = start.x + x_rad;
 	center.y = start.y + y_rad;
+
+	unit_rect.left = start.x;
+	unit_rect.right = end.x;
+	unit_rect.top = start.y;
+	unit_rect.bottom = end.y;
 }
 
 void dll::PROTON::new_width(float _new_width)
@@ -138,6 +163,11 @@ void dll::PROTON::new_width(float _new_width)
 	end.x = start.x + _width;
 	
 	center.x = start.x + x_rad;
+
+	unit_rect.left = start.x;
+	unit_rect.right = end.x;
+	unit_rect.top = start.y;
+	unit_rect.bottom = end.y;
 }
 void dll::PROTON::new_height(float _new_height)
 {
@@ -148,6 +178,11 @@ void dll::PROTON::new_height(float _new_height)
 	end.y = start.y + _height;
 
 	center.y = start.y + y_rad;
+
+	unit_rect.left = start.x;
+	unit_rect.right = end.x;
+	unit_rect.top = start.y;
+	unit_rect.bottom = end.y;
 }
 
 void dll::PROTON::set_path(float _ex, float _ey)
@@ -192,6 +227,11 @@ float dll::PROTON::get_target_x()const
 float dll::PROTON::get_target_y()const
 {
 	return move_ey;
+}
+
+D2D1_RECT_F dll::PROTON::get_rect()const
+{
+	return unit_rect;
 }
 
 ////////////////////////////////////////////
@@ -284,7 +324,120 @@ dll::FIELD* dll::FIELD::create(fields what, float sx, float sy)
 
 ///////////////////////////////////////////
 
+// HERO class ****************************
 
+dll::HERO::HERO(float s_x, float s_y) :PROTON(s_x, s_y, 24.0f, 35.0f){}
+
+void dll::HERO::climb(float ground_speed, D2D1_RECT_F hill, fields hill_type)
+{
+	if (action != actions::climb_up && action != actions::climb_down)
+	{
+		if (dir == dirs::right)
+		{
+			if (hill_type == fields::left_slope)
+			{
+				action = actions::climb_up;
+				set_path(hill.right, hill.top);
+			}
+			else if(hill_type == fields::right_slope)
+			{
+				action = actions::climb_down;
+				set_path(hill.right, hill.bottom);
+			}
+		}
+		else if (dir == dirs::left)
+		{
+			if (hill_type == fields::left_slope)
+			{
+				action = actions::climb_down;
+				set_path(hill.left, hill.bottom);
+			}
+			else if (hill_type == fields::right_slope)
+			{
+				action = actions::climb_up;
+				set_path(hill.left, hill.top);
+			}
+		}
+	}
+
+	if (action == actions::climb_up)
+	{
+		if (dir == dirs::right)
+		{
+			float x_modifier = start.x + ground_speed;
+			start.y = x_modifier * slope + intercept;
+			set_edges();
+			if (end.y <= hill.top)
+			{
+				end.y = hill.top;
+				start.y = end.y - _height;
+				set_edges();
+				action = actions::stop;
+			}
+		}
+		else if (dir == dirs::left)
+		{
+			float x_modifier = start.x - ground_speed;
+			start.y = x_modifier * slope + intercept;
+			set_edges();
+			if (end.y <= hill.top)
+			{
+				end.y = hill.top;
+				start.y = end.y - _height;
+				set_edges();
+				action = actions::stop;
+			}
+		}
+	}
+	else if (action == actions::climb_down)
+	{
+		if (dir == dirs::right)
+		{
+			float x_modifier = start.x + ground_speed;
+			start.y = x_modifier * slope + intercept;
+			set_edges();
+			if (end.y >= hill.bottom)
+			{
+				end.y = hill.bottom;
+				start.y = end.y - _height;
+				set_edges();
+				action = actions::stop;
+			}
+		}
+		else if (dir == dirs::left)
+		{
+			float x_modifier = start.x - ground_speed;
+			start.y = x_modifier * slope + intercept;
+			set_edges();
+			if (end.y >= hill.bottom)
+			{
+				end.y = hill.bottom;
+				start.y = end.y - _height;
+				set_edges();
+				action = actions::stop;
+			}
+		}
+	}
+}
+
+void jump();
+
+int get_frame();
+
+void dll::HERO::Release()
+{
+	delete this;
+}
+
+dll::HERO* dll::HERO::create(float sx, float sy)
+{
+	HERO* ret = new HERO(sx, sy);
+
+	return ret;
+}
+
+
+//////////////////////////////////////////
 
 
 

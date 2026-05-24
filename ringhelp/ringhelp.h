@@ -27,6 +27,29 @@ enum class dirs { left = 0, right = 1 };
 enum class actions { run = 0, climb_up = 1, climb_down = 2, stop = 3 };
 enum class creatures { zombie_girl = 0, zombie_boy = 1, zombie_flyer = 2, hero = 3 };
 enum class fields { flat_ground = 0, left_slope = 1, right_slope = 2, background = 3, intro = 4, portal = 5 };
+enum class assets { rings = 0, armor = 1, potion = 2 };
+
+struct RINGHELP_API FADING
+{
+	assets type { assets::rings };
+
+	D2D1_RECT_F view_rect{};
+
+	int delay = 20;
+	
+	float opacity = 1.0f;
+
+	float get_opacity()
+	{
+		--delay;
+		if (delay <= 0)
+		{
+			delay = 20;
+			opacity -= 0.1f;
+		}
+		return opacity;
+	}
+};
 
 namespace dll
 {
@@ -446,6 +469,8 @@ namespace dll
 
 		float _speed{ 1.0f };
 
+		D2D1_RECT_F unit_rect{};
+
 	public:
 		D2D1_POINT_2F start{};
 		D2D1_POINT_2F end{};
@@ -473,6 +498,8 @@ namespace dll
 
 		float get_target_x()const;
 		float get_target_y()const;
+
+		D2D1_RECT_F get_rect() const;
 	};
 
 	class RINGHELP_API FIELD :public PROTON
@@ -496,7 +523,37 @@ namespace dll
 		static FIELD* create(fields what, float sx, float sy);
 	};
 
+	class RINGHELP_API HERO :public PROTON
+	{
+	private:
+		int frame = 0;
+		int max_frames = 5;
+		int frame_delay = 12;
+		int max_frame_delay = 12;
 
+		bool in_jump = false;
+		bool jump_up = false;
+
+		HERO(float s_x, float s_y);
+
+	public:
+		dirs dir{ dirs::right };
+		actions action{ actions::stop };
+		
+		int lifes = 100;
+		int damage = 5;
+		int armor = 1;
+
+		void climb(float ground_speed, D2D1_RECT_F hill, fields hill_type);
+
+		void jump();
+
+		int get_frame();
+
+		void Release();
+
+		static HERO* create(float sx, float sy);
+	};
 
 
 
