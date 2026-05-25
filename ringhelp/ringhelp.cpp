@@ -496,16 +496,173 @@ dll::HERO* dll::HERO::create(float sx, float sy)
 
 //////////////////////////////////////////
 
+// EVIL class *********************************************
 
+dll::EVIL::EVIL(creatures _what_type, float s_x, float s_y) :PROTON(s_x, s_y)
+{
+	type = _what_type;
 
+	switch (type)
+	{
+	case creatures::zombie_girl:
+		new_dims(24.0, 35.0);
+		_speed = 0.3f;
+		lifes = 75;
+		damage = 3;
+		armor = 1;
+		attack_delay = 80;
+		max_frames = 7;
+		frame_delay = 9;
+		break;
 
+	case creatures::zombie_boy:
+		new_dims(22.0, 35.0);
+		_speed = 0.2f;
+		lifes = 80;
+		damage = 4;
+		attack_delay = 90;
+		armor = 2;
+		max_frames = 7;
+		frame_delay = 9;
+		break;
 
+	case creatures::zombie_flyer:
+		new_dims(41.0, 65.0);
+		_speed = 0.1f;
+		lifes = 100;
+		damage = 5;
+		armor = 3;
+		attack_delay = 100;
+		max_frames = 10;
+		frame_delay = 6;
+		break;
+	}
 
+	max_frame_delay = frame_delay;
+	max_attack_delay = attack_delay;
+}
 
+bool dll::EVIL::move(float gear, BAG<FIELD>& grounds)
+{
+	float my_speed = _speed + gear / 10.0f;
 
+	if (!grounds.empty())
+	{
+		for (int i = 0; i < grounds.size(); ++i)
+		{
+			D2D1_RECT_F tile{ grounds[i].start.x, grounds[i].start.y, grounds[i].end.x, grounds[i].end.y };
 
+			if (intersect(tile, unit_rect))
+			{
+				if (grounds[i].type == fields::flat_ground)
+				{
+					if (dir == dirs::left)
+					{
+						start.x -= my_speed;
+						end.y = tile.top;
+						start.y = end.y - _height;
+						set_edges();
+						if (end.x <= 0)return false;
+					}
+					else if (dir == dirs::right)
+					{
+						start.x += my_speed;
+						end.y = tile.top;
+						start.y = end.y - _height;
+						set_edges();
+						if (start.x >= scr_width)return false;
+					}
+				}
+				else if (grounds[i].type == fields::left_slope)
+				{
+					if (dir == dirs::left)
+					{
+						action = actions::climb_down;
+						set_path(tile.left, tile.bottom);
+						start.x -= my_speed;
+						start.y = start.x * slope + intercept;
+						set_edges();
+						if (end.x <= 0)return false;
+					}
+					else if (dir == dirs::right)
+					{
+						action = actions::climb_up;
+						set_path(tile.right, tile.top);
+						start.x += my_speed;
+						start.y = start.x * slope + intercept;
+						set_edges();
+						if (start.x >= scr_width)return false;
+					}
+				}
+				else if (grounds[i].type == fields::right_slope)
+				{
+					if (dir == dirs::left)
+					{
+						action = actions::climb_up;
+						set_path(tile.right, tile.top);
+						start.x += my_speed;
+						start.y = start.x * slope + intercept;
+						set_edges();
 
+						if (end.x <= 0)return false;
+					}
+					else if (dir == dirs::right)
+					{
+						action = actions::climb_down;
+						set_path(tile.left, tile.bottom);
+						start.x -= my_speed;
+						start.y = start.x * slope + intercept;
+						set_edges();
+						if (start.x >= scr_width)return false;
+					}
+				}
 
+				break;
+			}
+		}
+	}
+
+	return true;
+}
+
+int dll::EVIL::get_frame()
+{
+	--frame_delay;
+	if (frame_delay <= 0)
+	{
+		frame_delay = max_frame_delay;
+		++frame;
+		if (frame > max_frames)frame = 0;
+	}
+
+	return frame;
+}
+
+int dll::EVIL::attack()
+{
+	--attack_delay;
+	if (attack_delay <= 0)
+	{
+		attack_delay = max_attack_delay;
+		return damage;
+	}
+
+	return 0;
+}
+
+void dll::EVIL::Release()
+{
+	delete this;
+}
+
+dll::EVIL* dll::EVIL::create(creatures what_type, float sx, float sy)
+{
+	EVIL* ret = new EVIL(what_type, sx, sy);
+
+	return ret;
+}
+
+///////////////////////////////////////////////////////////
 
 
 // FUNCTIONS **********************************************

@@ -169,7 +169,7 @@ namespace dll
 				max_size = other.max_size;
 				next_pos = other.next_pos;
 
-				base_ptr = reinterpret_cast<T*>(calloc(max_size, sizeof(T)));
+				basePtr = reinterpret_cast<T*>(calloc(max_size, sizeof(T)));
 				if (basePtr == nullptr)throw EXCEPTION(EX_INIT);
 				else if (other.next_pos > 0)
 					for (size_t count = 0; count < next_pos; ++count)basePtr[count] = other.basePtr[count];
@@ -180,7 +180,7 @@ namespace dll
 				max_size = 1;
 				next_pos = 0;
 
-				base_ptr = reinterpret_cast<T*>(calloc(max_size, sizeof(T)));
+				basePtr = reinterpret_cast<T*>(calloc(max_size, sizeof(T)));
 				if (basePtr == nullptr)throw EXCEPTION(EX_INIT);
 			}
 
@@ -194,7 +194,7 @@ namespace dll
 				max_size = other.max_size;
 				next_pos = other.next_pos;
 
-				base_ptr = other.basePtr;
+				basePtr = other.basePtr;
 				other.basePtr = nullptr;
 			}
 
@@ -208,7 +208,6 @@ namespace dll
 			{
 				if (index <= 0)return *basePtr;
 				else if (index >= next_pos)return basePtr[next_pos - 1];
-				else
 			}
 
 			return basePtr[index];
@@ -245,7 +244,7 @@ namespace dll
 			{
 				if (next_pos == 0)
 				{
-					*m_ptr = element;
+					*basePtr = element;
 					++next_pos;
 					return;
 				}
@@ -254,7 +253,7 @@ namespace dll
 					if (next_pos + 1 <= max_size)
 					{
 						for (size_t cur_pos = next_pos; cur_pos > 0; --cur_pos)basePtr[cur_pos] = basePtr[cur_pos - 1];
-						*base_ptr = element;
+						*basePtr = element;
 						++next_pos;
 						return;
 					}
@@ -268,7 +267,7 @@ namespace dll
 						{
 							basePtr = tempPtr;
 							for (size_t cur_pos = next_pos; cur_pos > 0; --cur_pos)basePtr[cur_pos] = basePtr[cur_pos - 1];
-							*base_ptr = element;
+							*basePtr = element;
 							++next_pos;
 							return;
 						}
@@ -283,7 +282,7 @@ namespace dll
 			{
 				if (next_pos == 0)
 				{
-					*m_ptr = *element;
+					*basePtr = *element;
 					++next_pos;
 					return;
 				}
@@ -292,7 +291,7 @@ namespace dll
 					if (next_pos + 1 <= max_size)
 					{
 						for (size_t cur_pos = next_pos; cur_pos > 0; --cur_pos)basePtr[cur_pos] = basePtr[cur_pos - 1];
-						*base_ptr = *element;
+						*basePtr = *element;
 						++next_pos;
 						return;
 					}
@@ -306,7 +305,7 @@ namespace dll
 						{
 							basePtr = tempPtr;
 							for (size_t cur_pos = next_pos; cur_pos > 0; --cur_pos)basePtr[cur_pos] = basePtr[cur_pos - 1];
-							*base_ptr = *element;
+							*basePtr = *element;
 							++next_pos;
 							return;
 						}
@@ -322,7 +321,7 @@ namespace dll
 			{
 				if (next_pos + 1 <= max_size)
 				{
-					base_ptr[next_pos] = element;
+					basePtr[next_pos] = element;
 					++next_pos;
 					return;
 				}
@@ -350,7 +349,7 @@ namespace dll
 			{
 				if (next_pos + 1 <= max_size)
 				{
-					base_ptr[next_pos] = *element;
+					basePtr[next_pos] = *element;
 					++next_pos;
 					return;
 				}
@@ -395,7 +394,7 @@ namespace dll
 						if (!tempPtr)throw EXCEPTION(EX_INIT);
 						else
 						{
-							base_ptr = tempPtr;
+							basePtr = tempPtr;
 							for (size_t count = next_pos; count > index; --count)basePtr[count] = basePtr[count - 1];
 							basePtr[index] = element;
 							++next_pos;
@@ -428,7 +427,7 @@ namespace dll
 						if (!tempPtr)throw EXCEPTION(EX_INIT);
 						else
 						{
-							base_ptr = tempPtr;
+							basePtr = tempPtr;
 							for (size_t count = next_pos; count > index; --count)basePtr[count] = basePtr[count - 1];
 							basePtr[index] = *element;
 							++next_pos;
@@ -557,9 +556,38 @@ namespace dll
 		static HERO* create(float sx, float sy);
 	};
 
+	class RINGHELP_API EVIL :public PROTON
+	{
+	private:
+		int frame = 0;
+		int max_frames = 5;
+		int frame_delay = 12;
+		int max_frame_delay = 12;
 
+		int attack_delay{ 0 };
+		int max_attack_delay{ 0 };
 
+		EVIL(creatures _what_type, float s_x, float s_y);
 
+	public:
+		creatures type;
+		dirs dir{ dirs::left };
+		actions action{ actions::run };
+
+		int lifes = 100;
+		int damage = 5;
+		int armor = 1;
+
+		bool move(float gear, BAG<FIELD>& grounds);
+
+		int attack();
+
+		int get_frame();
+
+		void Release();
+
+		static EVIL* create(creatures what_type, float sx, float sy);
+	};
 
 	// FUNCTIONS **********************************************
 
