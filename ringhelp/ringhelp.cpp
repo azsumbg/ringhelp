@@ -286,11 +286,13 @@ bool dll::FIELD::move(float gear, dirs to_where)
 		start.x -= my_speed;
 		set_edges();
 		if (end.x >= -scr_width)return true;
+		break;
 
 	case dirs::right:
 		start.x += my_speed;
 		set_edges();
 		if (start.x <= 2.0f * scr_width)return true;
+		break;
 	}
 
 	return false;
@@ -469,6 +471,29 @@ void dll::HERO::jump(BAG<D2D1_RECT_F>& grounds)
 	}
 }
 
+void dll::HERO::fall(BAG<D2D1_RECT_F>& grounds)
+{
+	if (in_jump || grounds.empty())return;
+	else
+	{
+		start.y++;
+		set_edges();
+		action = actions::fall;
+
+		for (int i = 0; i < grounds.size(); ++i)
+		{
+			if (intersect(unit_rect, grounds[i]))
+			{
+				end.y = grounds[i].top;
+				start.y = end.y - _height;
+				set_edges();
+				action = actions::stop;
+				break;
+			}
+		}
+	}
+}
+
 int dll::HERO::get_frame()
 {
 	--frame_delay;
@@ -556,6 +581,7 @@ bool dll::EVIL::move(float gear, BAG<FIELD>& grounds)
 			{
 				if (grounds[i].type == fields::flat_ground)
 				{
+					action = actions::run;
 					if (dir == dirs::left)
 					{
 						start.x -= my_speed;
@@ -623,6 +649,29 @@ bool dll::EVIL::move(float gear, BAG<FIELD>& grounds)
 	}
 
 	return true;
+}
+
+void dll::EVIL::fall(BAG<D2D1_RECT_F>& grounds)
+{
+	if (grounds.empty())return;
+	else
+	{
+		start.y++;
+		set_edges();
+		action = actions::fall;
+
+		for (int i = 0; i < grounds.size(); ++i)
+		{
+			if (intersect(unit_rect, grounds[i]))
+			{
+				end.y = grounds[i].top;
+				start.y = end.y - _height;
+				set_edges();
+				action = actions::stop;
+				break;
+			}
+		}
+	}
 }
 
 int dll::EVIL::get_frame()

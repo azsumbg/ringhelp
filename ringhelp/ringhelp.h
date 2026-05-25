@@ -26,7 +26,7 @@ constexpr int EX_INIT{ 6004 };
 constexpr int EX_UNK{ 6005 };
 
 enum class dirs { left = 0, right = 1 };
-enum class actions { run = 0, climb_up = 1, climb_down = 2, stop = 3 };
+enum class actions { run = 0, climb_up = 1, climb_down = 2, stop = 3, fall = 4 };
 enum class creatures { zombie_girl = 0, zombie_boy = 1, zombie_flyer = 2, hero = 3 };
 enum class fields { flat_ground = 0, left_slope = 1, right_slope = 2, background = 3, intro = 4, portal = 5 };
 enum class assets { rings = 0, armor = 1, potion = 2 };
@@ -549,6 +549,8 @@ namespace dll
 
 		void jump(BAG<D2D1_RECT_F>& grounds);
 
+		void fall(BAG<D2D1_RECT_F>& grounds);
+
 		int get_frame();
 
 		void Release();
@@ -579,6 +581,8 @@ namespace dll
 		int armor = 1;
 
 		bool move(float gear, BAG<FIELD>& grounds);
+
+		void fall(BAG<D2D1_RECT_F>& grounds);
 
 		int attack();
 
